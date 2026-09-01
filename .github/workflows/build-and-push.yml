@@ -42,6 +42,7 @@ jobs:
           file: ./appflowy-src/Dockerfile
           push: true
           provenance: false
+          sbom: false
           tags: ghcr.io/lennartklein/appflowy-cloud:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
