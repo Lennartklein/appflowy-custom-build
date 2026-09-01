@@ -17,12 +17,6 @@ jobs:
       - name: Checkout local repo
         uses: actions/checkout@v4
 
-      - name: Set lowercase repository owner
-        id: prep
-        run: |
-          # Wandelt den Repository-Owner zuverlässig in Kleinbuchstaben um
-          echo "owner_lc=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_OUTPUT
-
       - name: Clone upstream AppFlowy-Cloud
         run: |
           git clone --depth 1 https://github.com/AppFlowy-IO/AppFlowy-Cloud.git appflowy-src
@@ -48,7 +42,7 @@ jobs:
           context: ./appflowy-src
           file: ./appflowy-src/Dockerfile
           push: true
-          # Nutzt den umgewandelten Kleinbuchstaben-Namen:
-          tags: ghcr.io/${{ steps.prep.outputs.owner_lc }}/appflowy-cloud:latest
+          # Hier steht jetzt fest 'lennartklein' in Kleinbuchstaben:
+          tags: ghcr.io/lennartklein/appflowy-cloud:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
