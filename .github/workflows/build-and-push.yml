@@ -17,6 +17,12 @@ jobs:
       - name: Checkout local repo
         uses: actions/checkout@v4
 
+      - name: Set lowercase repository owner
+        id: prep
+        run: |
+          # Wandelt den Repository-Owner zuverlässig in Kleinbuchstaben um
+          echo "owner_lc=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_OUTPUT
+
       - name: Clone upstream AppFlowy-Cloud
         run: |
           git clone --depth 1 https://github.com/AppFlowy-IO/AppFlowy-Cloud.git appflowy-src
@@ -24,7 +30,6 @@ jobs:
       - name: Apply Seat Limit Patch
         run: |
           cd appflowy-src
-          # Setzt gefundene Standard-Limits im Quellcode auf 999
           find . -type f -name "*.rs" -exec sed -i -E 's/(DEFAULT_FREE_MEMBER_LIMIT: usize = )[0-9]+;/\1999;/g' {} +
 
       - name: Set up Docker Buildx
@@ -43,6 +48,7 @@ jobs:
           context: ./appflowy-src
           file: ./appflowy-src/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/appflowy-cloud:latest
+          # Nutzt den umgewandelten Kleinbuchstaben-Namen:
+          tags: ghcr.io/${{ steps.prep.outputs.owner_lc }}/appflowy-cloud:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
