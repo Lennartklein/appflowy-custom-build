@@ -1,0 +1,48 @@
+name: Build and Release Custom AppFlowy Server
+
+on:
+  schedule:
+    # Baut automatisch jeden Sonntag um 03:00 Uhr
+    - cron: '0 3 * * 0'
+  workflow_dispatch: # Erlaubt manuelles Starten per Klick
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout local repo
+        uses: actions/checkout@v4
+
+      - name: Clone upstream AppFlowy-Cloud
+        run: |
+          git clone --depth 1 https://github.com/AppFlowy-IO/AppFlowy-Cloud.git appflowy-src
+
+      - name: Apply Seat Limit Patch
+        run: |
+          cd appflowy-src
+          # Setzt gefundene Standard-Limits im Quellcode auf 999
+          find . -type f -name "*.rs" -exec sed -i -E 's/(DEFAULT_FREE_MEMBER_LIMIT: usize = )[0-9]+;/\1999;/g' {} +
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./appflowy-src
+          file: ./appflowy-src/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/appflowy-cloud:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
