@@ -2,9 +2,8 @@ name: Build and Release Custom AppFlowy Server
 
 on:
   schedule:
-    # Baut automatisch jeden Sonntag um 03:00 Uhr
     - cron: '0 3 * * 0'
-  workflow_dispatch: # Erlaubt manuelles Starten per Klick
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -42,7 +41,7 @@ jobs:
           context: ./appflowy-src
           file: ./appflowy-src/Dockerfile
           push: true
-          # Hier steht jetzt fest 'lennartklein' in Kleinbuchstaben:
+          provenance: false
           tags: ghcr.io/lennartklein/appflowy-cloud:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
